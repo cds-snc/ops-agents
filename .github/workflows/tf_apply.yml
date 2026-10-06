@@ -41,4 +41,4 @@ jobs:
 
       - name: Apply devops_agent 
         working-directory: terragrunt/env/production/devops-agent
-        run: terragrunt apply --terragrunt-non-interactive -auto-approve
+        run: terragrunt --non-interactive apply -auto-approve
