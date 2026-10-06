@@ -6,6 +6,6 @@ inputs = {
   cost_center_code = "ops-agents"
 
   agent_space_name        = "CDS SRE agent space"
-  agent_space_description = "AWS DevOps Agent Space for the production payments platform"
-  application_name        = "payments-platform"
+  agent_space_description = "AWS DevOps Agent Space for the production sre tools platform"
+  application_name        = "sre-tools-platform"
 }
