@@ -2,7 +2,7 @@
 
 Terraform and Terragrunt configuration for deploying an AWS DevOps Agent Space, its IAM roles, and an AWS account association.
 
-AWS DevOps Agent can inspect associated AWS resources and operational data to help investigate incidents, identify likely causes, and recommend improvements. An Agent Space is the access and operational boundary for that work. This configuration creates one Agent Space in `ca-central-1` and associates the deployment account as a monitoring account.
+AWS DevOps Agent can inspect associated AWS resources and operational data to help investigate incidents, identify likely causes, and recommend improvements. An Agent Space is the access and operational boundary for that work. This configuration creates one or more Agent Spaces in `ca-central-1`, one per team, and associates the deployment account as a monitoring account for each of them.
 
 ## Repository Layout
 
@@ -31,19 +31,26 @@ Use temporary credentials or an assumed role for production. Do not put access k
 
 ## Configure Before Deployment
 
-The production account, cost centre, Agent Space name, description, and application name are configured in `terragrunt/env/production/env_vars.hcl`. That file currently declares `inputs` twice; combine the values into one block before using the configuration. The shared `root.hcl` configures the `ca-central-1` provider and an encrypted S3 remote state backend with a DynamoDB table for state locking.
+The production account and cost centre are configured in `terragrunt/env/production/env_vars.hcl`. The shared `root.hcl` configures the `ca-central-1` provider and an encrypted S3 remote state backend with a DynamoDB table for state locking.
 
-The module requires `agent_space_name`, `agent_space_description`, and `application_name`. Although these values are present in `env_vars.hcl`, `root.hcl` currently forwards only the shared account and tagging inputs to Terraform. Add mappings for the three required values to the `inputs` block in `terragrunt/env/root.hcl` (or configure and merge them at the production unit) before planning. For example:
+## Adding an Agent Space for a Team
+
+Agent Spaces are defined in the `agent_spaces` map in `terragrunt/env/production/devops-agent/terragrunt.hcl`. To add one, add an entry and open a pull request:
 
 ```hcl
-inputs = {
-	agent_space_name        = local.vars.inputs.agent_space_name
-	agent_space_description = local.vars.inputs.agent_space_description
-	application_name        = local.vars.inputs.application_name
+agent_spaces = {
+  sre = { ... }
+
+  platform = {
+    name             = "CDS Platform agent space"
+    description      = "AWS DevOps Agent Space for the platform team"
+    application_name = "platform"
+    tags             = { Team = "platform" } # optional
+  }
 }
 ```
 
-`terragrunt/env/production/devops-agent/terragrunt.hcl` points to the existing `terragrunt/aws/devops-agent` module and includes the shared root configuration. The production input values must still be forwarded to the module as described above. The module also uses the `awscc` and `time` providers, while `terragrunt/env/common/provider.tf` only constrains `hashicorp/aws` to `~> 6.0`; add constraints and commit the lock file if reproducible provider selection is required.
+Each entry gets its own agent IAM role, operator IAM role, Agent Space and monitoring-account association. The map key is a short team identifier made of lowercase letters, numbers and hyphens. Do not rename a key after it has been applied, because Terraform will destroy and recreate that team's Agent Space. Removing an entry destroys that team's Agent Space.
 
 ## Deploy
 
@@ -59,14 +66,8 @@ To upgrade providers within the declared constraints, update the configuration a
 
 ## Outputs
 
-The module exposes these Terraform outputs:
-
-- `agent_space_id` and `agent_space_arn`
-- `agent_space_name`
-- `devops_agent_role_arn`
-- `operator_role_arn`
+- `agent_spaces`: a map keyed by team identifier with each space's `id`, `arn`, `name`, `devops_agent_role_arn` and `operator_role_arn`.
 - `monitoring_account_id`
-
 
 Verify the Agent Space in the AWS DevOps Agent console and confirm that the account association and resource discovery are active.
 
