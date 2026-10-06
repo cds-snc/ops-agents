@@ -35,22 +35,23 @@ The production account and cost centre are configured in `terragrunt/env/product
 
 ## Adding an Agent Space for a Team
 
-Agent Spaces are defined in the `agent_spaces` map in `terragrunt/env/production/devops-agent/terragrunt.hcl`. To add one, add an entry and open a pull request:
+Each Agent Space is defined by one YAML file in `terragrunt/env/production/devops-agent/agent-spaces/`. The file name without `.yaml` is the team key. To add a team:
 
-```hcl
-agent_spaces = {
-  sre = { ... }
+1. Copy `agent-spaces/_template.yaml.example` to `agent-spaces/<team-key>.yaml`, for example `platform.yaml`.
+2. Fill in the values and open a pull request.
+3. Review the plan. It should only show new resources for the new team.
+4. Merge to `main` to create the Agent Space.
 
-  platform = {
-    name             = "CDS Platform agent space"
-    description      = "AWS DevOps Agent Space for the platform team"
-    application_name = "platform"
-    tags             = { Team = "platform" } # optional
-  }
-}
+```yaml
+# agent-spaces/platform.yaml
+name: CDS Platform agent space
+description: AWS DevOps Agent Space for the platform team
+application_name: platform
+tags:            # optional
+  Team: platform
 ```
 
-Each entry gets its own agent IAM role, operator IAM role, Agent Space and monitoring-account association. The map key is a short team identifier made of lowercase letters, numbers and hyphens. Do not rename a key after it has been applied, because Terraform will destroy and recreate that team's Agent Space. Removing an entry destroys that team's Agent Space.
+Each file gets its own agent IAM role, operator IAM role, Agent Space and monitoring-account association. The team key must be lowercase letters, numbers and hyphens, and each `name` must be unique. Do not rename a file after it has been applied, because Terraform will destroy and recreate that team's Agent Space. Deleting a file destroys that team's Agent Space.
 
 ## Deploy
 

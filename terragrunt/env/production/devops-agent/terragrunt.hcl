@@ -6,22 +6,15 @@ include "root" {
   path = find_in_parent_folders("root.hcl")
 }
 
-inputs = {
-  # One entry per team. To add an Agent Space, add a new entry below and open a PR.
-  # The key is a short, stable team identifier (lowercase letters, numbers, hyphens).
-  # Do not rename a key once applied: that destroys and recreates the Agent Space.
-  agent_spaces = {
-    sre = {
-      name             = "CDS SRE agent space"
-      description      = "AWS DevOps Agent Space for the production sre tools platform"
-      application_name = "sre-tools-platform"
-    }
+locals {
+  # Each YAML file in agent-spaces/ defines one Agent Space.
+  # The file name (without .yaml) is the team key. See the README for the file format.
+  agent_space_dir = "${get_terragrunt_dir()}/agent-spaces"
+}
 
-    # example-team = {
-    #   name             = "CDS Example Team agent space"
-    #   description      = "AWS DevOps Agent Space for the example team"
-    #   application_name = "example-application"
-    #   tags             = { Team = "example-team" } # optional
-    # }
+inputs = {
+  agent_spaces = {
+    for f in fileset(local.agent_space_dir, "*.yaml") :
+    trimsuffix(f, ".yaml") => yamldecode(file("${local.agent_space_dir}/${f}"))
   }
 }
