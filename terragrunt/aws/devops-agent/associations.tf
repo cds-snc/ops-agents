@@ -1,6 +1,6 @@
 resource "awscc_devopsagent_association" "monitoring_account" {
   agent_space_id = awscc_devopsagent_agent_space.this.agent_space_id
-  service_id      = "aws"
+  service_id     = "aws"
 
   configuration = {
     aws = {
