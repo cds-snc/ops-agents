@@ -13,8 +13,9 @@ resource "awscc_devopsagent_agent_space" "this" {
   description = var.agent_space_description
 
   operator_app = {
-    enabled  = true
-    role_arn = aws_iam_role.operator.arn
+    iam = {
+      operator_app_role_arn = aws_iam_role.operator.arn
+    }
   }
 
   depends_on = [

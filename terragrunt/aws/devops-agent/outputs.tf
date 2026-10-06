@@ -5,7 +5,7 @@ output "agent_space_id" {
 
 output "agent_space_arn" {
   description = "AWS DevOps Agent Space ARN."
-  value       = awscc_devopsagent_agent_space.this.agent_space_arn
+  value       = awscc_devopsagent_agent_space.this.arn
 }
 
 output "agent_space_name" {
