@@ -33,7 +33,6 @@ resource "awscc_devopsagent_agent_space" "this" {
   description = each.value.description
 
   operator_app = {
-    # IAM sign-in stays enabled as short (30 minute) administrator access.
     iam = {
       operator_app_role_arn = aws_iam_role.operator[each.key].arn
     }
