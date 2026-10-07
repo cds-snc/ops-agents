@@ -12,8 +12,10 @@ output "agent_spaces" {
       identity_center_application_arn = contains(local.idc_space_keys, key) ? space.operator_app.idc.idc_application_arn : null
 
       # The ARN looks like arn:aws:sso::<account>:application/ssoins-xxxx/apl-xxxx.
-      # The application ID is the last part, apl-xxxx.
-      identity_center_application_id = contains(local.idc_space_keys, key) ? element(split("/", space.operator_app.idc.idc_application_arn), 2) : null
+      # The application ID is the last part, apl-xxxx. The ARN is null until AWS
+      # has created the application, for example during the plan that first
+      # enables Identity Center, so fall back to null instead of failing.
+      identity_center_application_id = try(element(split("/", space.operator_app.idc.idc_application_arn), 2), null)
     }
   }
 }
