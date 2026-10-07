@@ -7,6 +7,13 @@ output "agent_spaces" {
       name                  = space.name
       devops_agent_role_arn = aws_iam_role.devops_agent[key].arn
       operator_role_arn     = aws_iam_role.operator[key].arn
+
+      # Null when the space does not use Identity Center.
+      identity_center_application_arn = contains(local.idc_space_keys, key) ? space.operator_app.idc.idc_application_arn : null
+
+      # The ARN looks like arn:aws:sso::<account>:application/ssoins-xxxx/apl-xxxx.
+      # The application ID is the last part, apl-xxxx.
+      identity_center_application_id = contains(local.idc_space_keys, key) ? element(split("/", space.operator_app.idc.idc_application_arn), 2) : null
     }
   }
 }

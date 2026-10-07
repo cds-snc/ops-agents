@@ -13,6 +13,8 @@ locals {
 }
 
 inputs = {
+  identity_center_instance_arn = "arn:aws:sso:::instance/ssoins-8824c710b5ddb452"
+
   agent_spaces = {
     for f in fileset(local.agent_space_dir, "*.yaml") :
     trimsuffix(f, ".yaml") => yamldecode(file("${local.agent_space_dir}/${f}"))

@@ -12,6 +12,10 @@ variable "agent_spaces" {
     description      = string
     application_name = string
     tags             = optional(map(string), {})
+
+    # Connects the space's web app to IAM Identity Center. Groups are assigned to
+    # the resulting application in the landing zone repository.
+    identity_center_enabled = optional(bool, false)
   }))
 
   validation {
@@ -32,6 +36,22 @@ variable "agent_spaces" {
   validation {
     condition     = length(distinct([for space in values(var.agent_spaces) : space.name])) == length(var.agent_spaces)
     error_message = "Agent Space names must be unique."
+  }
+}
+
+variable "identity_center_instance_arn" {
+  description = <<-EOT
+    ARN of the IAM Identity Center organization instance used for web app sign-in, for
+    example arn:aws:sso:::instance/ssoins-1234567890abcdef. Required when any Agent Space
+    sets identity_center_enabled. Find it under Settings in the Identity Center console
+    of the management account.
+  EOT
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.identity_center_instance_arn == null || can(regex("^arn:aws[a-z-]*:sso:::instance/(sso)?ins-[a-zA-Z0-9-.]{16}$", var.identity_center_instance_arn))
+    error_message = "identity_center_instance_arn must look like arn:aws:sso:::instance/ssoins-1234567890abcdef."
   }
 }
 
