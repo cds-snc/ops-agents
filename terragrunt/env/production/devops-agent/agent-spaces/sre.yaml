@@ -4,3 +4,7 @@
 name: CDS SRE agent space
 description: AWS DevOps Agent Space for the production sre tools platform
 application_name: sre-tools-platform
+
+# Web app sign-in through IAM Identity Center. The SRE-DevOps-Agent group is
+# assigned to the resulting application in the landing zone repository.
+identity_center_enabled: true

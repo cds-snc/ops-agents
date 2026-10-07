@@ -1,8 +1,12 @@
 data "aws_iam_policy_document" "operator_assume_role" {
   statement {
-    sid     = "AllowAWSDevOpsAgentOperatorApp"
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
+    sid    = "AllowAWSDevOpsAgentOperatorApp"
+    effect = "Allow"
+
+    # sts:TagSession lets the web app tag the session with the AgentSpaceId, which
+    # AIDevOpsOperatorAppAccessPolicy uses to scope access. It is required for both
+    # IAM and Identity Center sign-in.
+    actions = ["sts:AssumeRole", "sts:TagSession"]
 
     principals {
       type        = "Service"
@@ -13,6 +17,12 @@ data "aws_iam_policy_document" "operator_assume_role" {
       test     = "StringEquals"
       variable = "aws:SourceAccount"
       values   = [data.aws_caller_identity.current.account_id]
+    }
+
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+      values   = ["arn:${data.aws_partition.current.partition}:aidevops:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:agentspace/*"]
     }
   }
 }
