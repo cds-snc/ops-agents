@@ -1,0 +1,6 @@
+# AWS DevOps Agent Space for the SRE team.
+# The file name (without .yaml) is the team key. Do not rename it once applied:
+# that destroys and recreates this Agent Space.
+name: CDS SRE agent space
+description: AWS DevOps Agent Space for the production sre tools platform
+application_name: sre-tools-platform

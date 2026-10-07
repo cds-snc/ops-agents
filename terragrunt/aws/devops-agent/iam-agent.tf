@@ -17,17 +17,23 @@ data "aws_iam_policy_document" "devops_agent_assume_role" {
   }
 }
 
+# One agent role per Agent Space. The prefix follows the AWS DevOps Agent naming
+# convention; the AgentSpace tag identifies which team the role belongs to.
 resource "aws_iam_role" "devops_agent" {
+  for_each = var.agent_spaces
+
   name_prefix        = "DevOpsAgentRole-AgentSpace-"
-  description        = "Role assumed by AWS DevOps Agent for ${var.application_name}"
+  description        = "Role assumed by AWS DevOps Agent for ${each.value.application_name}"
   assume_role_policy = data.aws_iam_policy_document.devops_agent_assume_role.json
 
-  tags = var.default_tags
+  tags = local.agent_space_tags[each.key]
 }
 
 # Attach the AWS-managed DevOps Agent access policy
 resource "aws_iam_role_policy_attachment" "devops_agent_access" {
-  role       = aws_iam_role.devops_agent.name
+  for_each = var.agent_spaces
+
+  role       = aws_iam_role.devops_agent[each.key].name
   policy_arn = "arn:${data.aws_partition.current.partition}:iam::aws:policy/AIDevOpsAgentAccessPolicy"
 }
 
@@ -53,7 +59,9 @@ data "aws_iam_policy_document" "resource_explorer_service_linked_role" {
 }
 
 resource "aws_iam_role_policy" "resource_explorer_service_linked_role" {
+  for_each = var.agent_spaces
+
   name   = "AllowResourceExplorerServiceLinkedRole"
-  role   = aws_iam_role.devops_agent.id
+  role   = aws_iam_role.devops_agent[each.key].id
   policy = data.aws_iam_policy_document.resource_explorer_service_linked_role.json
 }

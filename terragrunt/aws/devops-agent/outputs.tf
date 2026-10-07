@@ -1,26 +1,14 @@
-output "agent_space_id" {
-  description = "AWS DevOps Agent Space ID."
-  value       = awscc_devopsagent_agent_space.this.agent_space_id
-}
-
-output "agent_space_arn" {
-  description = "AWS DevOps Agent Space ARN."
-  value       = awscc_devopsagent_agent_space.this.arn
-}
-
-output "agent_space_name" {
-  description = "AWS DevOps Agent Space name."
-  value       = var.agent_space_name
-}
-
-output "devops_agent_role_arn" {
-  description = "IAM role assumed by AWS DevOps Agent."
-  value       = aws_iam_role.devops_agent.arn
-}
-
-output "operator_role_arn" {
-  description = "Operator web application IAM role."
-  value       = aws_iam_role.operator.arn
+output "agent_spaces" {
+  description = "Created AWS DevOps Agent Spaces, keyed by team identifier."
+  value = {
+    for key, space in awscc_devopsagent_agent_space.this : key => {
+      id                    = space.agent_space_id
+      arn                   = space.arn
+      name                  = space.name
+      devops_agent_role_arn = aws_iam_role.devops_agent[key].arn
+      operator_role_arn     = aws_iam_role.operator[key].arn
+    }
+  }
 }
 
 output "monitoring_account_id" {

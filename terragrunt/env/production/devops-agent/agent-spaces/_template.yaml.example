@@ -1,0 +1,19 @@
+# Template for a new AWS DevOps Agent Space.
+# Copy this file to <team-key>.yaml (lowercase letters, numbers and hyphens, e.g. platform.yaml),
+# fill in the values and open a pull request. Files not ending in .yaml are ignored.
+#
+# Do not rename the file once applied: that destroys and recreates the Agent Space.
+# Deleting the file destroys the Agent Space.
+
+# Required: unique, human-readable name of the Agent Space (at least 3 characters).
+name: CDS Example Team agent space
+
+# Required: what this Agent Space covers.
+description: AWS DevOps Agent Space for the example team
+
+# Required: application or platform monitored by this Agent Space.
+application_name: example-application
+
+# Optional: extra tags applied to this Agent Space's IAM roles.
+tags:
+  Team: example-team
