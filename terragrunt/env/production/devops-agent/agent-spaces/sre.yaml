@@ -12,6 +12,6 @@ identity_center_enabled: true
 # Secondary account IDs this space can investigate. Each account needs the
 # DevOpsAgentRole-AgentSpace role. Uncomment and add one line per account.
 # Quote account IDs so YAML keeps them as text.
-# source_accounts:
-#   - "111122223333"
+source_accounts:
+   - "206482634516"
 
