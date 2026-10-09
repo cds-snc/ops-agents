@@ -20,10 +20,10 @@ locals {
   source_account_associations = {
     for pair in flatten([
       for key, space in var.agent_spaces : [
-        for account in space.source_accounts : {
+        for account_id in space.source_accounts : {
           space      = key
-          account_id = account.account_id
-          role_arn   = account.role_arn
+          account_id = account_id
+          role_arn   = "arn:${data.aws_partition.current.partition}:iam::${account_id}:role/${var.source_account_role_name}"
         }
       ]
     ]) : "${pair.space}/${pair.account_id}" => pair
@@ -31,10 +31,10 @@ locals {
 }
 
 # Secondary (source) accounts the Agent Space investigates. The role in each account
-# is created outside this repository in aft-account-customizations and in aft-account-request.
-# with devops_agent_space_arn flag. Its trust policy allows aidevops.amazonaws.com  
-# with aws:SourceAccount set to this monitoring account and aws:SourceArn matching 
-# the the Agent Space ARN.
+# (var.source_account_role_name) is created outside this repository, in
+# aft-account-customizations and aft-account-request with the devops_agent_space_arn
+# flag. Its trust policy allows aidevops.amazonaws.com with aws:SourceAccount set to
+# this monitoring account and aws:SourceArn matching the Agent Space ARN.
 resource "awscc_devopsagent_association" "source_account" {
   for_each = local.source_account_associations
 
