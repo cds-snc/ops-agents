@@ -22,3 +22,9 @@ tags:
 # After apply, give the identity_center_application_arn output to the landing zone
 # repository, which assigns Identity Center groups to the application.
 identity_center_enabled: true
+
+# Optional: secondary account IDs this space can investigate. Each account needs the
+# DevOpsAgentRole-AgentSpace role, trusting aidevops.amazonaws.com from this
+# monitoring account. Quote account IDs so YAML keeps them as text.
+source_accounts:
+  - "111122223333"
