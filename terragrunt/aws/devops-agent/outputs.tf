@@ -16,6 +16,12 @@ output "agent_spaces" {
       # has created the application, for example during the plan that first
       # enables Identity Center, so fall back to null instead of failing.
       identity_center_application_id = try(element(split("/", space.operator_app.idc.idc_application_arn), 2), null)
+
+      # Secondary accounts associated with the space.
+      source_account_ids = sort([
+        for assoc in values(local.source_account_associations) : assoc.account_id
+        if assoc.space == key
+      ])
     }
   }
 }

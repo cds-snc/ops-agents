@@ -16,6 +16,10 @@ variable "agent_spaces" {
     # Connects the space's web app to IAM Identity Center. Groups are assigned to
     # the resulting application in the landing zone repository.
     identity_center_enabled = optional(bool, false)
+
+    # Secondary account IDs the Agent Space can investigate. Each account must
+    # already have the role named by source_account_role_name.
+    source_accounts = optional(list(string), [])
   }))
 
   validation {
@@ -36,6 +40,43 @@ variable "agent_spaces" {
   validation {
     condition     = length(distinct([for space in values(var.agent_spaces) : space.name])) == length(var.agent_spaces)
     error_message = "Agent Space names must be unique."
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for space in values(var.agent_spaces) : [
+        for account_id in space.source_accounts : can(regex("^[0-9]{12}$", account_id))
+      ]
+    ]))
+    error_message = "Each source account must be a 12-digit account ID, quoted in YAML."
+  }
+
+  validation {
+    condition = alltrue([
+      for space in values(var.agent_spaces) :
+      length(distinct(space.source_accounts)) == length(space.source_accounts)
+    ])
+    error_message = "A source account can only be listed once per Agent Space."
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for space in values(var.agent_spaces) : [
+        for account_id in space.source_accounts : account_id != var.account_id
+      ]
+    ]))
+    error_message = "The monitoring account is associated automatically. Do not list it under source_accounts."
+  }
+}
+
+variable "source_account_role_name" {
+  description = "Name of the role AWS DevOps Agent assumes in every secondary account. It is created outside this repository."
+  type        = string
+  default     = "DevOpsAgentRole-AgentSpace"
+
+  validation {
+    condition     = can(regex("^[\\w+=,.@-]{1,64}$", var.source_account_role_name))
+    error_message = "source_account_role_name must be a valid IAM role name."
   }
 }
 
